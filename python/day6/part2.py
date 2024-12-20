@@ -1,5 +1,4 @@
 # coding: utf-8
-
 import sys
 
 def main():
@@ -36,7 +35,6 @@ def main():
 
     # 候補を出しておく
     candidates = set()
-
     while 0 <= x < m and 0 <= y < n:
         if lines[x][y] == ".":
             candidates.add((x, y))
