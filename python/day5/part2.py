@@ -1,5 +1,4 @@
 # coding: utf-8
-
 import sys
 from collections import defaultdict
 from typing import List
@@ -28,7 +27,6 @@ def main():
                         break
         return flag
     
-
     line_count = 0
     for line in lines:
         line_count += 1
