@@ -11,8 +11,6 @@ fn main() {
         let line = line.unwrap();
 
         for capture in pattern.captures_iter(&line) {
-            println!("{:?}", capture.get(0).unwrap().as_str());
-
             if let Some(mul_str) = capture.get(1) {
                 if mul_str.as_str() == "mul" {
                     let d1: i32 = capture[2].parse().unwrap();

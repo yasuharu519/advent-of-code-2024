@@ -10,7 +10,6 @@ def main():
     for line in sys.stdin.readlines():
         line = line.strip()
         for match in pattern.finditer(line):
-            print(match)
             if match.group(1) == "mul":
                 if enabled:
                     result += int(match.group(2)) * int(match.group(3))
