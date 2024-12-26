@@ -54,11 +54,7 @@ def main():
     
     # 各候補ごとに絞り込み
     result = 0
-    i = 0
     for ox, oy in list(candidates):
-        i += 1
-        if i % 100 == 0:
-            print(i)
         lines[ox][oy] = "#"
         if detect_loop(sx, sy, 0):
             result += 1
