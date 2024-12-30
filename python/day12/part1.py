@@ -2,6 +2,8 @@
 import sys
 from collections import deque
 
+directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
 def main():
     gardens = [list(line.strip()) for line in sys.stdin.readlines()]
     m = len(gardens)
@@ -24,11 +26,13 @@ def main():
             passed.add((x, y))
             count += 1
             fences += 4
-            for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+
+            for dx, dy in directions:
                 nx, ny = x + dx, y + dy
                 fences -= int(0 <= nx < m and 0 <= ny < n and gardens[nx][ny] == c)
                 if 0 <= nx < m and 0 <= ny < n and gardens[nx][ny] == c and (nx, ny) not in passed:
                     queue.append((nx, ny))
+
         print(count, fences, c)
         return count * fences
 

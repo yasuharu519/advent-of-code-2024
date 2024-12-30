@@ -1,38 +1,59 @@
-# coding: utf-8
 import sys
 from collections import defaultdict, deque
 from typing import Tuple, List
 
+directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
 def main():
     gardens = [list(line.strip()) for line in sys.stdin.readlines()]
+
     m = len(gardens)
     n = len(gardens[0])
-    print(gardens)
 
-    passed = set()
-
-    def bfs(x, y) -> List[Tuple[int, int]]:
+    def count_same_plants(x, y) -> List[Tuple[int, int]]:
+        """
+        (x, y) で指定された grid と隣接している同じ植物のセルを探す
+        """
         c = gardens[x][y]
         queue = deque([(x, y)])
-        passed.add((x, y))
+
         cells = set()
         cells.add((x, y))
+
         while queue:
             x, y = queue.popleft()
-            for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+            for dx, dy in directions:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < m and 0 <= ny < n:
-                    if (nx, ny) not in passed and gardens[nx][ny] == c:
-                        passed.add((nx, ny))
+                    if (nx, ny) not in cells and gardens[nx][ny] == c:
                         queue.append((nx, ny))
                         cells.add((nx, ny))
         return cells
+
+    def merge_fence(segments):
+        """
+        [(s1, e1), (s2, e2), ...] のようなセグメントが渡されるので、重なっている部分をマージする
+        """
+        segments.sort()
+        rest = deque(segments[:])
+        merged = []
+
+        while rest:
+            s, e = rest.popleft()
+            while rest and rest[0][0] <= e:
+                _, e = rest.popleft()
+            merged.append((s, e))
+        return merged
     
-    def extract_edges(cells):
+    def count_fences(cells):
+        """
+        渡されたセル情報から、周囲の fence の数を数える
+        """
         up = defaultdict(list)
         bottom = defaultdict(list)
         left = defaultdict(list)
         right = defaultdict(list)
+
         cell_set = set(cells)
         for x, y in cells:
             if x == 0 or (x-1, y) not in cell_set:
@@ -44,48 +65,30 @@ def main():
             if y == n-1 or (x, y+1) not in cell_set:
                 right[y+1].append((x, x+1))
 
-        def merge_segments(segments):
-            print(segments)
-            segments.sort()
-            merged = []
-            cs, ce = segments[0]
-            for s, e in segments[1:]:
-                if s <= ce:
-                    ce = max(ce, e)
-                else:
-                    merged.append((cs, ce))
-                    cs, ce = s, e
-            merged.append((cs, ce))
-            return merged
-        for row in up:
-            up[row] = merge_segments(up[row])
-            print(f"row up: {row}, {up[row]}")
-        for row in bottom:
-            bottom[row] = merge_segments(bottom[row])
-            print(f"row bottom: {row}, {bottom[row]}")
-        for col in left:
-            left[col] = merge_segments(left[col])
-            print(f"col left: {col}, {left[col]}")
-        for col in right:
-            right[col] = merge_segments(right[col])
-            print(f"col right: {col}, {right[col]}")
-        
-        side_count = sum(len(up[row]) for row in up) + \
-            sum(len(bottom[row]) for row in bottom) + \
-            sum(len(left[col]) for col in left) + \
-            sum(len(right[col]) for col in right)
+        side_count = 0
+        for l in up.values():
+            side_count += len(merge_fence(l))
+        for l in bottom.values():
+            side_count += len(merge_fence(l))
+        for l in left.values():
+            side_count += len(merge_fence(l))
+        for l in right.values():
+            side_count += len(merge_fence(l))
         return side_count
 
     result = 0
+    counted_segment = set()
     for i in range(m):
         for j in range(n):
-            if (i, j) in passed:
+            if (i, j) in counted_segment:
                 continue
-            cells = bfs(i, j)
-            print(cells)
-            edges = extract_edges(cells)
-            result += len(cells) * edges
-            print(gardens[i][j], len(cells), edges)
+
+            plants = count_same_plants(i, j)
+            counted_segment.update(plants)
+
+            fence_num = count_fences(plants)
+            result += len(plants) * fence_num
+            print(gardens[i][j], len(plants), fence_num)
     print(result)
 
 
