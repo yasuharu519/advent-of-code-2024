@@ -1,20 +1,18 @@
-# coding: utf-8
 import sys
 
 def main():
-    lines = [line.strip() for line in sys.stdin.readlines()]
-    length = len(lines)
-    problems = length // 4
+    chunks = sys.stdin.read().split("\n\n")
     result = 0
 
-    for problem_num in range(problems):
-        button_a = lines[problem_num * 4 + 0][9:]
-        # button_a.removeprefix("Button A:")
+    for chunk in chunks:
+        lines = chunk.strip().split("\n")
+        button_a, button_b, prize = lines
+        button_a = button_a.removeprefix("Button A:")
+        button_b = button_b.removeprefix("Button B: ")
+        prize = prize.removeprefix("Prize: ")
+
         ax, ay = map(int, [x[2:] for x in button_a.strip().split(", ")])
-        button_b = lines[problem_num * 4 + 1][9:]
-        # button_b.removeprefix("Button B: ")
         bx, by = map(int, [x[2:] for x in button_b.strip().split(", ")])
-        prize = lines[problem_num * 4 + 2][7:]
         px, py = map(int, [x[2:] for x in prize.strip().split(", ")])
 
         cost = float('inf')
