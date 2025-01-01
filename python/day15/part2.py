@@ -2,34 +2,32 @@
 from collections import deque
 from typing import Tuple
 import os
+import sys
 
 def main():
-    # lines = [line.strip() for line in sys.stdin.readlines()]
-    lines = [line.strip() for line in open("../../data/day15.txt").readlines()]
+    chunks = sys.stdin.read().split("\n\n")
+    map_data, move_data = chunks
+
+    moves = "".join(move_data.split("\n"))
     S = []
-    moves = []
-    input_map = True
-    for line in lines:
-        if line.strip() == "":
-            input_map = False
-        elif input_map:
-            new_line = []
-            for c in line:
-                if c == "#":
-                    new_line.append("#")
-                    new_line.append("#")
-                elif c == "O":
-                    new_line.append("[")
-                    new_line.append("]")
-                elif c == ".":
-                    new_line.append(".")
-                    new_line.append(".")
-                elif c == "@":
-                    new_line.append("@")
-                    new_line.append(".")
-            S.append(new_line)
-        else:
-            moves.append(line)
+
+    for line in map_data.split("\n"):
+        new_line = []
+        for c in line:
+            if c == "#":
+                new_line.append("#")
+                new_line.append("#")
+            elif c == "O":
+                new_line.append("[")
+                new_line.append("]")
+            elif c == ".":
+                new_line.append(".")
+                new_line.append(".")
+            elif c == "@":
+                new_line.append("@")
+                new_line.append(".")
+        S.append(new_line)
+
     print("Initial")
     for line in S:
         print("".join(line))
