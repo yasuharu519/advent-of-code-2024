@@ -6,6 +6,9 @@ MAP_W = 101
 MAP_H = 103
 
 def get_quad(px, py):
+    """
+    px, py がどの象限に属するかを返す
+    """
     if px < MAP_W // 2:
         if py < MAP_H // 2:
             return 0
@@ -19,6 +22,7 @@ def get_quad(px, py):
 
 def main():
     lines = [line.strip() for line in sys.stdin.readlines()]
+
     quads = [0] * 4
     for line in lines:
         pos, vec = line.strip().split(" ")
@@ -33,9 +37,7 @@ def main():
         if nx == MAP_W // 2 or ny == MAP_H // 2:
             continue
         quads[get_quad(nx, ny)] += 1
-    
     print(reduce(lambda x, y: x * y, quads))
-
 
 if __name__ == "__main__":
     main()

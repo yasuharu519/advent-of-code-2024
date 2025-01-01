@@ -1,6 +1,6 @@
-# coding: utf-8
 import os
 import time
+import sys
 
 MAP_W = 101
 MAP_H = 103
@@ -18,8 +18,7 @@ def print_robots_positions(robots):
         print("".join(row))
 
 def main():
-    lines = [line.strip() for line in open("../../data/day14.txt").readlines()]
-    # lines = [line.strip() for line in sys.stdin.readlines()]
+    lines = [line.strip() for line in sys.stdin.readlines()]
     robots = []
     for line in lines:
         pos, vec = line.strip().split(" ")
@@ -28,9 +27,10 @@ def main():
         vx, vy = map(int, vec.split(","))
         robots.append((px, py, vx, vy))
     
+    # 33, 87, 134, 190, 235, 293... の時にパターンが見える
     t = 33
-    while True:
-        time.sleep(1)
+    while t <= 7709:
+        time.sleep(0.1)
         os.system("clear")
         print(f"Second {t}")
 
@@ -43,7 +43,6 @@ def main():
         print_robots_positions(robots_t)
         t += 101
         print()
-        # 33, 87, 134, 190, 235
 
 
 if __name__ == "__main__":
