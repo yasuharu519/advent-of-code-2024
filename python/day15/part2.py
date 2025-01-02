@@ -95,7 +95,7 @@ def main():
             if hasBlock:
                 yy = ny
                 while yy != py + dy:
-                    S[nx][yy] = S[nx][yy+1]
+                    S[nx][yy] = S[nx][yy-dy]
                     yy -= dy
                 S[px][py+dy] = "."
             S[px][py] = "."
@@ -111,21 +111,21 @@ def main():
         dx, dy = v
 
         # 右のものを確認
-        nx, ny = px, py + 1
+        nx, ny = px, py + dy
         hasBlock = False
         while S[nx][ny] == "[" or S[nx][ny] == "]":
             hasBlock = True
-            ny += 1
+            ny += dy
         if S[nx][ny] == ".":
             if hasBlock:
                 yy = ny
-                while yy != py + 1:
-                    S[nx][yy] = S[nx][yy-1]
-                    yy -= 1
-                S[px][py+1] = "."
+                while yy != py + dy:
+                    S[nx][yy] = S[nx][yy-dy]
+                    yy -= dy
+                S[px][py+dy] = "."
             S[px][py] = "."
-            S[px][py+1] = "@"
-            return (px, py + 1)
+            S[px][py+dy] = "@"
+            return (px, py + dy)
         else:
             return (px, py)
 
