@@ -34,19 +34,23 @@ def main():
         dx, dy = v
         # 左のものを確認
         nx, ny = px + dx, py + dy
-        hasBlock = False
-        while S[nx][ny] == "O":
-            hasBlock = True
-            nx, ny = nx + dx, ny + dy
         if S[nx][ny] == ".":
-            if hasBlock:
-                S[nx][ny] = "O"
-                S[px+dx][py+dy] = "."
-            S[px][py] = "."
-            S[px+dx][py+dy] = "@"
-            return (px + dx, py + dy)
-        else:
+            S[nx][ny], S[px][py] = "@", "."
+            return (nx, ny)
+        elif S[nx][ny] == "#":
             return (px, py)
+
+        while S[nx][ny] == "O":
+            nx, ny = nx + dx, ny + dy
+            if S[nx][ny] == ".":
+                break
+            elif S[nx][ny] == "#":
+                return (px, py)
+
+        S[nx][ny] = "O"
+        S[px+dx][py+dy] = "@"
+        S[px][py] = "."
+        return (px + dx, py + dy)
     
     # 移動
     for move in moves:
