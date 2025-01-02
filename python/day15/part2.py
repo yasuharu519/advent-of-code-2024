@@ -25,10 +25,11 @@ def print_positions(S):
         print()
 
 # 対象のブロックを動かせるかどうか
-def can_move(S, p, v) -> bool:
+def can_move_vertically(S, p, v) -> bool:
     px, py = p
     dx, dy = v
 
+    # 押しているのが箱の左側かどうか
     pushing_left_side = (S[px][py] == "[")
     if pushing_left_side:
         px_l, py_l = px, py
@@ -48,7 +49,7 @@ def can_move(S, p, v) -> bool:
     res = []
     for (xx, yy) in [(nx_l, ny_l), (nx_r, ny_r)]:
         if S[xx][yy] in ["[", "]"]:
-            res.append(can_move(S, (xx, yy), v))
+            res.append(can_move_vertically(S, (xx, yy), v))
         elif S[xx][yy] == ".":
             res.append(True)
         else:
@@ -138,7 +139,7 @@ def main():
         elif S[nx][ny] == "#":
             return (px, py)
         # 障害物を押せるかどうか
-        if not can_move(S, (nx, ny), v):
+        if not can_move_vertically(S, (nx, ny), v):
             return (px, py)
         
         queue = deque([(nx, ny)])
