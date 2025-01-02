@@ -4,13 +4,19 @@ from typing import Tuple
 import os
 import sys
 
+move_vector = {
+    "<": (0, -1),
+    ">": (0, +1),
+    "^": (-1, 0),
+    "v": (1, 0)
+}
+
 def main():
     chunks = sys.stdin.read().split("\n\n")
     map_data, move_data = chunks
 
     moves = "".join(move_data.split("\n"))
     S = []
-
     for line in map_data.split("\n"):
         new_line = []
         for c in line:
@@ -73,26 +79,37 @@ def main():
                 return can_move(nx, ny-1, vx, vy) and can_move(nx, ny, vx, vy)
 
     # 移動
-    def move_left(px, py) -> Tuple:
+    def move_left(p, v) -> Tuple:
+        # 現在の位置
+        px, py = p
+        # 移動量
+        dx, dy = v
+
         # 左のものを確認
-        nx, ny = px, py - 1
+        nx, ny = px, py + dy
         hasBlock = False
         while S[nx][ny] == "[" or S[nx][ny] == "]":
             hasBlock = True
-            ny -= 1
+            ny += dy
         if S[nx][ny] == ".":
             if hasBlock:
                 yy = ny
-                while yy != py - 1:
+                while yy != py + dy:
                     S[nx][yy] = S[nx][yy+1]
-                    yy += 1
-                S[px][py-1] = "."
+                    yy -= dy
+                S[px][py+dy] = "."
             S[px][py] = "."
-            S[px][py-1] = "@"
-            return (px, py-1)
+            S[px][py+dy] = "@"
+            return (px, py+dy)
         else:
             return (px, py)
-    def move_right(px, py):
+
+    def move_right(p, v):
+        # 現在の位置
+        px, py = p
+        # 移動量
+        dx, dy = v
+
         # 右のものを確認
         nx, ny = px, py + 1
         hasBlock = False
@@ -111,7 +128,13 @@ def main():
             return (px, py + 1)
         else:
             return (px, py)
-    def move_up(px, py):
+
+    def move_up(p, v):
+        # 現在の位置
+        px, py = p
+        # 移動量
+        dx, dy = v
+
         # 上のものを確認
         nx, ny = px - 1, py
         if S[nx][ny] == ".":
@@ -148,7 +171,12 @@ def main():
         return (px - 1, py)
 
 
-    def move_down(px, py):
+    def move_down(p, v):
+        # 現在の位置
+        px, py = p
+        # 移動量
+        dx, dy = v
+
         # 下のものを確認
         nx, ny = px + 1, py
         if S[nx][ny] == ".":
@@ -192,13 +220,13 @@ def main():
             os.system("clear")
             print(f"Move: {move}")
             if move == "<":
-                x, y = move_left(x, y)
+                current = move_left(current, move_vector[move])
             elif move == ">":
-                x, y = move_right(x, y)
+                current = move_right(current, move_vector[move])
             elif move == "^":
-                x, y = move_up(x, y)
+                current = move_up(current, move_vector[move])
             else:
-                x, y = move_down(x, y)
+                current = move_down(current, move_vector[move])
             # print result
             for line in S:
                 print("".join(line))
