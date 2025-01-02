@@ -79,7 +79,7 @@ def main():
                 return can_move(nx, ny-1, vx, vy) and can_move(nx, ny, vx, vy)
 
     # 移動
-    def move_left(p, v) -> Tuple:
+    def move_horizontal(p, v) -> Tuple:
         # 現在の位置
         px, py = p
         # 移動量
@@ -104,89 +104,22 @@ def main():
         else:
             return (px, py)
 
-    def move_right(p, v):
-        # 現在の位置
-        px, py = p
-        # 移動量
-        dx, dy = v
-
-        # 右のものを確認
-        nx, ny = px, py + dy
-        hasBlock = False
-        while S[nx][ny] == "[" or S[nx][ny] == "]":
-            hasBlock = True
-            ny += dy
-        if S[nx][ny] == ".":
-            if hasBlock:
-                yy = ny
-                while yy != py + dy:
-                    S[nx][yy] = S[nx][yy-dy]
-                    yy -= dy
-                S[px][py+dy] = "."
-            S[px][py] = "."
-            S[px][py+dy] = "@"
-            return (px, py + dy)
-        else:
-            return (px, py)
-
-    def move_up(p, v):
-        # 現在の位置
-        px, py = p
-        # 移動量
-        dx, dy = v
-
-        # 上のものを確認
-        nx, ny = px - 1, py
-        if S[nx][ny] == ".":
-            S[nx][ny] = "@"
-            S[px][py] = "."
-            return (px - 1, py)
-        elif S[nx][ny] == "#":
-            return (px, py)
-
-        if not can_move(nx, ny, -1, 0):
-            return (px, py)
-        
-        queue = deque([(nx, ny)])
-        cells = set()
-        while queue:
-            x, y = queue.popleft()
-            if (x, y) in cells:
-                continue
-            if S[x][y] == "." or S[x][y] == "#":
-                continue
-            cells.add((x, y))
-            if S[x][y] == "[":
-                queue.append((x, y+1))
-                queue.append((x-1, y))
-            elif S[x][y] == "]":
-                queue.append((x, y-1))
-                queue.append((x-1, y))
-        
-        for x, y in sorted(list(cells)):
-            S[x-1][y] = S[x][y]
-            S[x][y] = "."
-        S[px-1][py] = S[px][py]
-        S[px][py] = "."
-        return (px - 1, py)
-
-
-    def move_down(p, v):
+    def move_vertical(p, v):
         # 現在の位置
         px, py = p
         # 移動量
         dx, dy = v
 
         # 下のものを確認
-        nx, ny = px + 1, py
+        nx, ny = px + dx, py
         if S[nx][ny] == ".":
             S[nx][ny] = "@"
             S[px][py] = "."
-            return (px + 1, py)
+            return (px + dx, py)
         elif S[nx][ny] == "#":
             return (px, py)
 
-        if not can_move(nx, ny, 1, 0):
+        if not can_move(nx, ny, dx, 0):
             return (px, py)
         
         queue = deque([(nx, ny)])
@@ -200,17 +133,18 @@ def main():
             cells.add((x, y))
             if S[x][y] == "[":
                 queue.append((x, y+1))
-                queue.append((x+1, y))
+                queue.append((x+dx, y))
             elif S[x][y] == "]":
                 queue.append((x, y-1))
-                queue.append((x+1, y))
+                queue.append((x+dx, y))
         
-        for x, y in sorted(list(cells), reverse=True):
-            S[x+1][y] = S[x][y]
+        sort_reverse = (dx > 0)
+        for x, y in sorted(list(cells), reverse=sort_reverse):
+            S[x+dx][y] = S[x][y]
             S[x][y] = "."
-        S[px+1][py] = S[px][py]
+        S[px+dx][py] = S[px][py]
         S[px][py] = "."
-        return (px + 1, py)
+        return (px + dx, py)
     
     # 移動
     i = 0
@@ -219,14 +153,10 @@ def main():
         for move in move_line:
             os.system("clear")
             print(f"Move: {move}")
-            if move == "<":
-                current = move_left(current, move_vector[move])
-            elif move == ">":
-                current = move_right(current, move_vector[move])
-            elif move == "^":
-                current = move_up(current, move_vector[move])
+            if move == "<" or move == ">":
+                current = move_horizontal(current, move_vector[move])
             else:
-                current = move_down(current, move_vector[move])
+                current = move_vertical(current, move_vector[move])
             # print result
             for line in S:
                 print("".join(line))
