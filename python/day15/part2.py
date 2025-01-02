@@ -3,6 +3,7 @@ from collections import deque
 from typing import Tuple
 import os
 import sys
+import time
 
 move_vector = {
     "<": (0, -1),
@@ -10,6 +11,49 @@ move_vector = {
     "^": (-1, 0),
     "v": (1, 0)
 }
+
+RED = "\033[31m"
+RESET = "\033[0m"
+
+def print_positions(S):
+    for line in S:
+        for c in line:
+            if c == "@":
+                print(f"{RED}{c}{RESET}", end="")
+            else:
+                print(c, end="")
+        print()
+
+# 対象のブロックを動かせるかどうか
+def can_move(S, p, v) -> bool:
+    px, py = p
+    dx, dy = v
+
+    pushing_left_side = (S[px][py] == "[")
+    if pushing_left_side:
+        px_l, py_l = px, py
+        px_r, py_r = px, py + 1
+    else:
+        px_l, py_l = px, py - 1
+        px_r, py_r = px, py
+    
+    nx_l, ny_l = px_l + dx, py_l + dy
+    nx_r, ny_r = px_r + dx, py_r + dy
+
+    if S[nx_l][ny_l] == "#" or S[nx_r][ny_r] == "#":
+        return False
+    if S[nx_l][ny_l] == "." and S[nx_r][ny_r] == ".":
+        return True
+
+    res = []
+    for (xx, yy) in [(nx_l, ny_l), (nx_r, ny_r)]:
+        if S[xx][yy] in ["[", "]"]:
+            res.append(can_move(S, (xx, yy), v))
+        elif S[xx][yy] == ".":
+            res.append(True)
+        else:
+            res.append(False)
+    return all(res)
 
 def main():
     chunks = sys.stdin.read().split("\n\n")
@@ -48,78 +92,53 @@ def main():
             if S[i][j] == "@":
                 current = (i, j)
 
-    # 対象のブロックを動かせるかどうか
-    def can_move(px, py, vx, vy):
-        nx, ny = px + vx, py + vy
-        if S[px][py] == "[":
-            if S[nx][ny] == "." and S[nx][ny+1] == ".":
-                return True
-            elif S[nx][ny] == "#" or S[nx][ny+1] == "#":
-                return False
-            elif S[nx][ny] == "." and S[nx][ny+1] == "[":
-                return can_move(nx, ny+1, vx, vy)
-            elif S[nx][ny] == "]" and S[nx][ny+1] == ".":
-                return can_move(nx, ny, vx, vy)
-            elif S[nx][ny] == "[" and S[nx][ny+1] == "]":
-                return can_move(nx, ny, vx, vy)
-            elif S[nx][ny] == "]" and S[nx][ny+1] == "[":
-                return can_move(nx, ny, vx, vy) and can_move(nx, ny+1, vx, vy)
-        elif S[px][py] == "]":
-            if S[nx][ny-1] == "." and S[nx][ny] == ".":
-                return True
-            elif S[nx][ny-1] == "#" or S[nx][ny] == "#":
-                return False
-            elif S[nx][ny-1] == "]" and S[nx][ny] == ".":
-                return can_move(nx, ny-1, vx, vy)
-            elif S[nx][ny-1] == "." and S[nx][ny] == "[":
-                return can_move(nx, ny, vx, vy)
-            elif S[nx][ny-1] == "[" and S[nx][ny] == "]":
-                return can_move(nx, ny, vx, vy)
-            elif S[nx][ny-1] == "]" and S[nx][ny] == "[":
-                return can_move(nx, ny-1, vx, vy) and can_move(nx, ny, vx, vy)
-
     # 移動
     def move_horizontal(p, v) -> Tuple:
         # 現在の位置
         px, py = p
         # 移動量
-        dx, dy = v
+        _, dy = v
 
-        # 左のものを確認
         nx, ny = px, py + dy
-        hasBlock = False
-        while S[nx][ny] == "[" or S[nx][ny] == "]":
-            hasBlock = True
-            ny += dy
+        # 移動先にブロックがない場合
         if S[nx][ny] == ".":
-            if hasBlock:
-                yy = ny
-                while yy != py + dy:
-                    S[nx][yy] = S[nx][yy-dy]
-                    yy -= dy
-                S[px][py+dy] = "."
-            S[px][py] = "."
-            S[px][py+dy] = "@"
-            return (px, py+dy)
-        else:
+            S[nx][ny], S[px][py] = "@", "."
+            return (nx, ny)
+        # 移動先が障害物の場合
+        elif S[nx][ny] == "#":
             return (px, py)
+
+        while S[nx][ny] == "[" or S[nx][ny] == "]":
+            ny += dy
+            if S[nx][ny] == ".":
+                break
+            elif S[nx][ny] == "#":
+                return (px, py)
+
+        # ブロックを奥から順に動かす
+        yy = ny
+        while yy != py + dy:
+            S[nx][yy] = S[nx][yy-dy]
+            yy -= dy
+        S[px][py] = "."
+        return (px, py+dy)
 
     def move_vertical(p, v):
         # 現在の位置
         px, py = p
         # 移動量
-        dx, dy = v
+        dx, _ = v
 
-        # 下のものを確認
         nx, ny = px + dx, py
+        # 移動先にブロックがない場合
         if S[nx][ny] == ".":
-            S[nx][ny] = "@"
-            S[px][py] = "."
-            return (px + dx, py)
+            S[nx][ny], S[px][py] = "@", "."
+            return (nx, ny)
+        # 移動先が障害物の場合
         elif S[nx][ny] == "#":
             return (px, py)
-
-        if not can_move(nx, ny, dx, 0):
+        # 障害物を押せるかどうか
+        if not can_move(S, (nx, ny), v):
             return (px, py)
         
         queue = deque([(nx, ny)])
@@ -152,14 +171,14 @@ def main():
     for move_line in moves:
         for move in move_line:
             os.system("clear")
+            
             print(f"Move: {move}")
             if move == "<" or move == ">":
                 current = move_horizontal(current, move_vector[move])
             else:
                 current = move_vertical(current, move_vector[move])
-            # print result
-            for line in S:
-                print("".join(line))
+            print_positions(S)
+            # time.sleep(0.1)
             i += 1
 
     result = 0
@@ -167,8 +186,6 @@ def main():
         for j in range(n):
             if S[i][j] == "[":
                 result += 100 * i + j
-    for line in S:
-        print("".join(line))
     print(result)
 
 
