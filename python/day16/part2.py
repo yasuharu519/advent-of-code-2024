@@ -20,7 +20,7 @@ def print_grid_and_path(grid, cell_on_best_routes):
             else:
                 print(grid[i][j], end="")
         print()
-    time.sleep(1)
+    time.sleep(0.1)
     return
 
 def main():

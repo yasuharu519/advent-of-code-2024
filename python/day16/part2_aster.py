@@ -20,11 +20,11 @@ def print_grid_and_path(grid, cell_on_best_routes):
             else:
                 print(grid[i][j], end="")
         print()
-    time.sleep(1)
+    time.sleep(0.1)
     return
 
-def manhattan_distance(x1, y1, x2, y2):
-    return abs(x1 - x2) + abs(y1 - y2)
+def manhattan_distance(x1, y1, x2, y2, d):
+    return abs(x1 - x2) + abs(y1 - y2) + (1000 if d == 2 or d == 3 else 0)
 
 def main():
     grid = [list(line.strip()) for line in sys.stdin.readlines()]
@@ -47,7 +47,7 @@ def main():
     directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     
     # かかった
-    heap = [(0 + manhattan_distance(sx, sy, ex, ey), 0, sx, sy, 1, set([(sx, sy)]))]
+    heap = [(0 + manhattan_distance(sx, sy, ex, ey, 1), 0, sx, sy, 1, set([(sx, sy)]))]
     best_score = float("inf")
     cell_on_best_routes = set()
 
@@ -78,7 +78,7 @@ def main():
             new_g = g + 1
             # if new_g <= dp[nx][ny][d]:
             #     dp[nx][ny][d] = new_g
-            new_h = manhattan_distance(nx, ny, ex, ey)
+            new_h = manhattan_distance(nx, ny, ex, ey, d)
             heapq.heappush(heap, (new_g + new_h, new_g, nx, ny, d, path | set([(nx, ny)])))
 
         # 回転
@@ -87,7 +87,7 @@ def main():
             new_g = g + 1000
             # if new_g <= dp[x][y][nd]:
             #     dp[x][y][nd] = new_g
-            new_h = manhattan_distance(x, y, ex, ey)
+            new_h = manhattan_distance(x, y, ex, ey, nd)
             heapq.heappush(heap, (new_g + new_h, new_g, x, y, nd, path))
 
     print_grid_and_path(grid, cell_on_best_routes)
