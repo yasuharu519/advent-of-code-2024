@@ -1,6 +1,9 @@
 import sys
 import heapq
 
+def manhattan_distance(x1, y1, x2, y2):
+    return abs(x1 - x2) + abs(y1 - y2)
+
 def main():
     grid = [list(line.strip()) for line in sys.stdin.readlines()]
     m = len(grid)
@@ -10,37 +13,43 @@ def main():
 
     # スタート地点を検索
     sx, sy = (0, 0)
+    ex, ey = (0, 0)
     for i in range(m):
         for j in range(n):
             if grid[i][j] == "S":
                 sx, sy = i, j
                 grid[i][j] = "."
+            if grid[i][j] == "E":
+                ex, ey = i, j
     
     directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     
     # N, E, S, W
-    heap = [(0, sx, sy, 1)]
+    heap = [(manhattan_distance(sx, sy, ex, ey), 0, sx, sy, 1)]
     steps = 0
     while heap:
+        f, g, x, y, d= heapq.heappop(heap)
         steps += 1
-        cost, x, y, d= heapq.heappop(heap)
         if grid[x][y] == "E":
             print(f"Steps: {steps}")
-            print(f"Points: {cost}")
+            print(f"Points: {g}")
             return
-        if dp[x][y][d] <= cost:
+        if dp[x][y][d] <= g:
             continue
-        dp[x][y][d] = cost
+        dp[x][y][d] = g
 
         # 一歩進む
         dx, dy = directions[d]
         nx, ny = x + dx, y + dy
         if 0 <= nx < m and 0 <= ny < n and grid[nx][ny] != "#":
-            heapq.heappush(heap, (cost + 1, nx, ny, d))
+            new_g = g + 1
+            heapq.heappush(heap, (new_g + manhattan_distance(nx, ny, ex, ey), new_g, nx, ny, d))
 
         # 回転
-        heapq.heappush(heap, (cost + 1000, x, y, (d + 1) % 4))
-        heapq.heappush(heap, (cost + 1000, x, y, (d - 1) % 4))
+        for rotate in [-1, 1]:
+            new_d = (d + rotate) % 4
+            new_g = g + 1000
+            heapq.heappush(heap, (new_g + manhattan_distance(x, y, ex, ey), new_g, x, y, new_d))
     
     print(-1)
     return
