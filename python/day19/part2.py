@@ -5,14 +5,11 @@ from functools import cache
 def check(target: str, color_set: Set[str]) -> bool:
     l = list(color_set)
     n = len(l)
-    counter = 0
 
     @cache
     def dfs(rest: str) -> int:
-        nonlocal counter
         if rest == "":
             return 1
-        
         count = 0
         for i in range(n):
             if rest.startswith(l[i]):
@@ -28,12 +25,7 @@ def main():
     color = [line.strip() for line in lines[0].split(",")]
     color_set = set(color)
 
-    count = 0
-    for line in lines[2:]:
-        print(f"check {line}")
-        line = line.strip()
-        count += check(line, color_set)
-    print(count)
+    print(sum([check(line.strip(), color_set) for line in lines[2:]]))
 
 if __name__ == "__main__":
     main()

@@ -23,12 +23,7 @@ def main():
     color = [line.strip() for line in lines[0].split(",")]
     color_set = set(color)
 
-    count = 0
-    for line in lines[2:]:
-        print("line", line) 
-        line = line.strip()
-        count += int(check(line, color_set))
-    print(count)
+    print(len([line for line in lines[2:] if check(line.strip(), color_set)]))
 
 if __name__ == "__main__":
     main()
