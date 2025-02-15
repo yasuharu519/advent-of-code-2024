@@ -19,34 +19,25 @@ def main():
     start_to_end = [[float('inf') for _ in range(n)] for _ in range(m)]
     end_to_start = [[float('inf') for _ in range(n)] for _ in range(m)]
 
-    # search start to end
-    queue = deque([(0, start)])
-    while queue:
-        cost, (x, y) = queue.popleft()
-        if start_to_end[x][y] <= cost:
-            continue
-        start_to_end[x][y] = cost
-        for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
-            nx, ny = x + dx, y + dy
-            if x <= 0 or x >= m-1 or y <= 0 or y >= n-1:
+    def search_shortest(start: tuple) -> list[list[int]]:
+        dp = [[float('inf') for _ in range(n)] for _ in range(m)]
+        # search start to end
+        queue = deque([(0, start)])
+        while queue:
+            cost, (x, y) = queue.popleft()
+            if dp[x][y] <= cost:
                 continue
-            if lines[nx][ny] == "." and start_to_end[nx][ny] > cost + 1:
-                queue.append((cost + 1, (nx, ny)))
+            dp[x][y] = cost
+            for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
+                nx, ny = x + dx, y + dy
+                if x <= 0 or x >= m-1 or y <= 0 or y >= n-1:
+                    continue
+                if lines[nx][ny] == "." and dp[nx][ny] > cost + 1:
+                    queue.append((cost + 1, (nx, ny)))
+        return dp
 
-    # search end to start
-    queue = deque([(0, end)])
-    while queue:
-        cost, (x, y) = queue.popleft()
-        if end_to_start[x][y] <= cost:
-            continue
-        end_to_start[x][y] = cost
-        for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
-            nx, ny = x + dx, y + dy
-            if x <= 0 or x >= m-1 or y <= 0 or y >= n-1:
-                continue
-            if lines[nx][ny] == "." and end_to_start[nx][ny] > cost + 1:
-                queue.append((cost + 1, (nx, ny)))
-    
+    start_to_end = search_shortest(start)
+    end_to_start = search_shortest(end)
     length = start_to_end[end[0]][end[1]]
     print(length)
 

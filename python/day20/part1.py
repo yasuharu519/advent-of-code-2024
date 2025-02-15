@@ -17,9 +17,6 @@ def main():
                 end = (i, j)
                 lines[i][j] = "."
     
-    start_to_end = [[float('inf') for _ in range(n)] for _ in range(m)]
-    end_to_start = [[float('inf') for _ in range(n)] for _ in range(m)]
-
     def search(start: tuple) -> list[list[int]]:
         dp = [[float('inf') for _ in range(n)] for _ in range(m)]
         # search start to end
@@ -41,12 +38,12 @@ def main():
     end_to_start = search(end)
     
     length = start_to_end[end[0]][end[1]]
-    print(length)
 
     passed = set()
     queue = deque([start])
     count = 0
     short_cut = set()
+    directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     while queue:
         x, y = queue.popleft()
         if (x, y) == end:
@@ -54,7 +51,8 @@ def main():
         if (x, y) in passed:
             continue
         passed.add((x, y))
-        for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
+
+        for dx, dy in directions:
             # check if there is a shortcut
             if lines[x+dx][y+dy] == "#" and \
                 0 <= x+2*dx < m and 0 <= y+2*dy < n and \
@@ -65,7 +63,7 @@ def main():
                 if new_length <= length - 100:
                     count += 1
         # move
-        for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
+        for dx, dy in directions:
             nx, ny = x + dx, y + dy
             if nx < 0 or nx >= m or ny < 0 or ny >= n:
                 continue
